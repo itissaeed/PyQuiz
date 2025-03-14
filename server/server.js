@@ -1,7 +1,21 @@
 const express = require("express");
 const app = express();
+const compression = require("compression");
 require("dotenv").config();
-app.use(express.json());
+
+// Add compression middleware
+app.use(compression());
+
+// Performance middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Add cache control headers
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'public, max-age=31557600'); // one year
+  next();
+});
+
 const dbConfig = require("./config/dbConfig");
 
 const usersRoute = require("./routes/usersRoute");

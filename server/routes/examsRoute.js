@@ -33,10 +33,25 @@ router.post("/add", authMiddleware, async (req, res) => {
 // get all exams
 router.post("/get-all-exams", authMiddleware, async (req, res) => {
   try {
-    const exams = await Exam.find({});
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const exams = await Exam.find({})
+      .select('name category totalMarks passingMarks duration') // Select only needed fields
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Convert to plain JS object for better performance
+
+    const total = await Exam.countDocuments({});
+
+    res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
     res.send({
       message: "Exams fetched successfully",
       data: exams,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
       success: true,
     });
   } catch (error) {

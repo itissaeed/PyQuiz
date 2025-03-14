@@ -74,3 +74,17 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom styles for form validation asterisk */
+.ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+  display: none !important;  /* Remove the default asterisk */
+}
+
+.ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::after {
+  display: inline-block;
+  margin-left: 4px;
+  color: #6366f1;  /* Indigo color */
+  font-size: 12px;
+  content: '(Required)';
+  font-weight: normal;
+}

@@ -38,6 +38,7 @@ function ProtectedRoute({ children }) {
       icon: <i className="ri-logout-box-line"></i>,
       onClick: () => {
         localStorage.removeItem("token");
+        dispatch(SetUser(null));
         navigate("/login");
       },
     },
@@ -74,6 +75,7 @@ function ProtectedRoute({ children }) {
       icon: <i className="ri-logout-box-line"></i>,
       onClick: () => {
         localStorage.removeItem("token");
+        dispatch(SetUser(null));
         navigate("/login");
       },
     },
@@ -92,9 +94,14 @@ function ProtectedRoute({ children }) {
           setMenu(userMenu);
         }
       } else {
+        localStorage.removeItem("token");
+        dispatch(SetUser(null));
         message.error(response.message);
+        navigate("/login");
       }
     } catch (error) {
+      localStorage.removeItem("token");
+      dispatch(SetUser(null));
       navigate("/login");
       dispatch(HideLoading());
       message.error(error.message);
@@ -131,6 +138,10 @@ function ProtectedRoute({ children }) {
     return false;
   };
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="layout">
       <div className="flex gap-2 w-full h-full h-100">
@@ -166,7 +177,7 @@ function ProtectedRoute({ children }) {
                 onClick={() => setCollapsed(false)}
               ></i>
             )}
-            <h1 className="text-2xl text-white">QUIZ Application</h1>
+            <h1 className="text-2xl text-white">Hi {user?.name}, Welcome to PyQuiz</h1>
             <div>
               <div className="flex gap-1 items-center">
                 <h1 className="text-md text-white">{user?.name}</h1>

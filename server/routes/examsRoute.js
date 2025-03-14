@@ -66,7 +66,20 @@ router.post("/get-all-exams", authMiddleware, async (req, res) => {
 // get exam by id
 router.post("/get-exam-by-id", authMiddleware, async (req, res) => {
   try {
-    const exam = await Exam.findById(req.body.examId).populate("questions");
+    const exam = await Exam.findById(req.body.examId)
+      .populate({
+        path: "questions",
+        model: "questions",
+        select: "name options correctOptions correctOption"
+      });
+
+    if (!exam) {
+      return res.status(404).send({
+        message: "Exam not found",
+        success: false,
+      });
+    }
+
     res.send({
       message: "Exam fetched successfully",
       data: exam,
@@ -143,16 +156,41 @@ router.post("/add-question-to-exam", authMiddleware, async (req, res) => {
 // edit question in exam
 router.post("/edit-question-in-exam", authMiddleware, async (req, res) => {
   try {
-    // edit question in Questions collection
-    await Question.findByIdAndUpdate(req.body.questionId, req.body);
+    const { questionId, name, correctOptions, correctOption, options, exam } = req.body;
+    
+    if (!questionId) {
+      return res.status(400).send({
+        message: "Question ID is required",
+        success: false,
+      });
+    }
+
+    // Find and update the question
+    const question = await Question.findById(questionId);
+    if (!question) {
+      return res.status(404).send({
+        message: "Question not found",
+        success: false,
+      });
+    }
+
+    // Update the question fields
+    question.name = name;
+    question.correctOptions = correctOptions;
+    question.correctOption = correctOptions[0] || '';
+    question.options = options;
+
+    await question.save();
+
     res.send({
       message: "Question edited successfully",
       success: true,
+      data: question,
     });
   } catch (error) {
+    console.error("Error editing question:", error);
     res.status(500).send({
-      message: error.message,
-      data: error,
+      message: error.message || "Error editing question",
       success: false,
     });
   }

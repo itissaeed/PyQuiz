@@ -1,4 +1,4 @@
-import { message } from "antd";
+import { message, Checkbox } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -47,7 +47,15 @@ function WriteExam() {
       let wrongAnswers = [];
 
       questions.forEach((question, index) => {
-        if (question.correctOption === selectedOptions[index]) {
+        const userAnswers = selectedOptions[index] || [];
+        const correctOptions = question.correctOptions || [];
+        
+        // Check if arrays have the same elements (order doesn't matter)
+        const isCorrect = 
+          userAnswers.length === correctOptions.length && 
+          userAnswers.every(answer => correctOptions.includes(answer));
+
+        if (isCorrect) {
           correctAnswers.push(question);
         } else {
           wrongAnswers.push(question);
@@ -132,36 +140,43 @@ function WriteExam() {
               </h1>
 
               <div className="timer">
-                <span className="text-2xl">{secondsLeft}</span>
+                <span className="text-2xl">
+                  {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, '0')}
+                </span>
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              {Object.keys(questions[selectedQuestionIndex].options).map(
-                (option, index) => {
-                  return (
-                    <div
-                      className={`flex gap-2 flex-col ${
-                        selectedOptions[selectedQuestionIndex] === option
-                          ? "selected-option"
-                          : "option"
-                      }`}
-                      key={index}
-                      onClick={() => {
-                        setSelectedOptions({
-                          ...selectedOptions,
-                          [selectedQuestionIndex]: option,
-                        });
-                      }}
-                    >
-                      <h1 className="text-xl">
-                        {option} :{" "}
-                        {questions[selectedQuestionIndex].options[option]}
-                      </h1>
-                    </div>
-                  );
-                }
-              )}
+              <Checkbox.Group
+                className="flex flex-col gap-2"
+                value={selectedOptions[selectedQuestionIndex] || []}
+                onChange={(values) => {
+                  setSelectedOptions({
+                    ...selectedOptions,
+                    [selectedQuestionIndex]: values,
+                  });
+                }}
+              >
+                {Object.keys(questions[selectedQuestionIndex].options).map(
+                  (option, index) => {
+                    return (
+                      <Checkbox
+                        key={index}
+                        value={option}
+                        className={`option p-2 ${
+                          (selectedOptions[selectedQuestionIndex] || []).includes(option)
+                            ? "selected-option"
+                            : ""
+                        }`}
+                      >
+                        <span className="text-xl">
+                          {option} : {questions[selectedQuestionIndex].options[option]}
+                        </span>
+                      </Checkbox>
+                    );
+                  }
+                )}
+              </Checkbox.Group>
             </div>
 
             <div className="flex justify-between">
@@ -270,26 +285,34 @@ function WriteExam() {
         {view === "review" && (
           <div className="flex flex-col gap-2">
             {questions.map((question, index) => {
-              const isCorrect =
-                question.correctOption === selectedOptions[index];
+              const userAnswers = selectedOptions[index] || [];
+              const correctOptions = question.correctOptions || [];
+              const isCorrect = 
+                userAnswers.length === correctOptions.length && 
+                userAnswers.every(answer => correctOptions.includes(answer));
+
               return (
                 <div
                   className={`
-                  flex flex-col gap-1 p-2 ${
-                    isCorrect ? "bg-success" : "bg-error"
-                  }
-                `}
+                    flex flex-col gap-1 p-2 ${isCorrect ? "bg-success" : "bg-error"}
+                  `}
                 >
                   <h1 className="text-xl">
                     {index + 1} : {question.name}
                   </h1>
                   <h1 className="text-md">
-                    Submitted Answer : {selectedOptions[index]} -{" "}
-                    {question.options[selectedOptions[index]]}
+                    Submitted Answer(s): {userAnswers.map(option => (
+                      <span key={option}>
+                        {option} - {question.options[option]}{", "}
+                      </span>
+                    ))}
                   </h1>
                   <h1 className="text-md">
-                    Correct Answer : {question.correctOption} -{" "}
-                    {question.options[question.correctOption]}
+                    Correct Answer(s): {correctOptions.map(option => (
+                      <span key={option}>
+                        {option} - {question.options[option]}{", "}
+                      </span>
+                    ))}
                   </h1>
                 </div>
               );

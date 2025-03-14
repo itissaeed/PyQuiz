@@ -27,30 +27,51 @@ function Login() {
 
   return (
     <div className="flex justify-center items-center h-screen w-screen bg-primary">
-      <div className="card w-400 p-3 bg-white">
+      <div className="card w-400 p-5 bg-white">
         <div className="flex flex-col">
-          <div className="flex">
-            <h1 className="text-2xl">QUIZ - LOGIN <i class="ri-login-circle-line"></i></h1>
-            
+          <div className="flex items-center justify-center">
+            <h1 className="text-2xl flex items-center">
+              <i className="ri-user-line text-3xl mr-2"></i>
+              Welcome Back
+            </h1>
           </div>
           <div className="divider"></div>
+          <div className="text-center mb-3 text-gray-500">
+            Sign in to your PyQuiz account
+          </div>
           <Form layout="vertical" className="mt-2" onFinish={onFinish}>
-            <Form.Item name="email" label="Email">
-              <input type="text" />
+            <Form.Item 
+              name="email" 
+              label="Email"
+              rules={[{ required: true, message: 'Please input your email!' }]}
+            >
+              <input 
+                type="email" 
+                className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors"
+                placeholder="Enter your email"
+              />
             </Form.Item>
-            <Form.Item name="password" label="Password">
-              <input type="password" />
+            <Form.Item 
+              name="password" 
+              label="Password"
+              rules={[{ required: true, message: 'Please input your password!' }]}
+            >
+              <input 
+                type="password" 
+                className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors"
+                placeholder="Enter your password"
+              />
             </Form.Item>
 
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="primary-contained-btn mt-2 w-100"
+                className="primary-contained-btn mt-2 w-100 py-2 rounded-lg hover:opacity-90 transition-all"
               >
-                Login
+                Sign In
               </button>
-              <Link to="/register" className="underline">
-                Not a member? Register
+              <Link to="/register" className="text-center text-gray-700 hover:text-black hover:underline">
+                Don't have an account? Register now
               </Link>
             </div>
           </Form>

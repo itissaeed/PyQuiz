@@ -6,17 +6,20 @@ import "./stylesheets/custom-components.css";
 import "./stylesheets/form-elements.css";
 import "./stylesheets/layout.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/common/Login";
-import Register from "./pages/common/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Home from "./pages/common/Home";
-import Exams from "./pages/admin/Exams";
-import AddEditExam from "./pages/admin/Exams/AddEditExam";
+import { Suspense, lazy } from 'react';
 import Loader from "./components/Loader";
 import { useSelector } from "react-redux";
-import WriteExam from "./pages/user/WriteExam";
-import UserReports from "./pages/user/UserReports";
-import AdminReports from "./pages/admin/AdminReports";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Lazy load components
+const Login = lazy(() => import("./pages/common/Login"));
+const Register = lazy(() => import("./pages/common/Register"));
+const Home = lazy(() => import("./pages/common/Home"));
+const Exams = lazy(() => import("./pages/admin/Exams"));
+const AddEditExam = lazy(() => import("./pages/admin/Exams/AddEditExam"));
+const WriteExam = lazy(() => import("./pages/user/WriteExam"));
+const UserReports = lazy(() => import("./pages/user/UserReports"));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 
 function App() {
   const { loading } = useSelector((state) => state.loader);
@@ -24,72 +27,74 @@ function App() {
     <>
       {loading && <Loader />}
       <BrowserRouter>
-        <Routes>
-          {/* Common Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <Suspense fallback={<Loader />}>
+          <Routes>
+            {/* Common Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* User Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/user/write-exam/:id"
-            element={
-              <ProtectedRoute>
-                <WriteExam />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/user/reports"
-            element={
-              <ProtectedRoute>
-                <UserReports />
-              </ProtectedRoute>
-            }
-          />
-          {/* Admin Routes */}
-          <Route
-            path="/admin/exams"
-            element={
-              <ProtectedRoute>
-                <Exams />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/exams/add"
-            element={
-              <ProtectedRoute>
-                <AddEditExam />
-              </ProtectedRoute>
-            }
-          />
+            {/* User Routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/write-exam/:id"
+              element={
+                <ProtectedRoute>
+                  <WriteExam />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/reports"
+              element={
+                <ProtectedRoute>
+                  <UserReports />
+                </ProtectedRoute>
+              }
+            />
+            {/* Admin Routes */}
+            <Route
+              path="/admin/exams"
+              element={
+                <ProtectedRoute>
+                  <Exams />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/exams/add"
+              element={
+                <ProtectedRoute>
+                  <AddEditExam />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin/exams/edit/:id"
-            element={
-              <ProtectedRoute>
-                <AddEditExam />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/exams/edit/:id"
+              element={
+                <ProtectedRoute>
+                  <AddEditExam />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin/reports"
-            element={
-              <ProtectedRoute>
-                <AdminReports />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+            <Route
+              path="/admin/reports"
+              element={
+                <ProtectedRoute>
+                  <AdminReports />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </>
   );

@@ -88,3 +88,66 @@
   content: '(Required)';
   font-weight: normal;
 }
+
+/* Custom styles for question form checkboxes */
+.checkbox-wrapper .ant-checkbox-wrapper {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.checkbox-wrapper .ant-checkbox-wrapper:hover {
+  background-color: #f3f4f6;
+}
+
+.checkbox-wrapper .ant-checkbox-wrapper-checked {
+  background-color: #ede9fe;
+  border-color: #7c3aed;
+}
+
+.checkbox-wrapper .ant-checkbox {
+  top: 0;
+}
+
+.checkbox-wrapper .ant-checkbox-inner {
+  width: 20px;
+  height: 20px;
+  border-color: #7c3aed;
+}
+
+.checkbox-wrapper .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.checkbox-wrapper .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+  margin-left: 0;
+}
+
+/* Animation for checkbox selection */
+.checkbox-wrapper .ant-checkbox-wrapper {
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+.checkbox-wrapper .ant-checkbox-wrapper:active {
+  transform: scale(0.98);
+}
+
+.checkbox-wrapper .ant-checkbox-wrapper-checked {
+  animation: checkboxPulse 0.3s ease-out;
+}
+
+@keyframes checkboxPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

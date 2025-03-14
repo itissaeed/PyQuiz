@@ -51,8 +51,9 @@ function Exams() {
       dataIndex: "name",
     },
     {
-      title: "Duration",
+      title: "Duration (Minutes)",
       dataIndex: "duration",
+      render: (duration) => Math.floor(duration / 60)
     },
     {
       title: "Category",

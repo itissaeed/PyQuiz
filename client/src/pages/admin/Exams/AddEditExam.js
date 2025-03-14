@@ -26,15 +26,18 @@ function AddEditExam() {
   const onFinish = async (values) => {
     try {
       dispatch(ShowLoading());
+      // Convert minutes to seconds before saving
+      const durationInSeconds = values.duration * 60;
+      const payload = { ...values, duration: durationInSeconds };
+      
       let response;
-
       if (params.id) {
         response = await editExamById({
-          ...values,
+          ...payload,
           examId: params.id,
         });
       } else {
-        response = await addExam(values);
+        response = await addExam(payload);
       }
       if (response.success) {
         message.success(response.message);
@@ -57,7 +60,12 @@ function AddEditExam() {
       });
       dispatch(HideLoading());
       if (response.success) {
-        setExamData(response.data);
+        // Convert seconds to minutes for display
+        const examWithMinutes = {
+          ...response.data,
+          duration: Math.floor(response.data.duration / 60)
+        };
+        setExamData(examWithMinutes);
       } else {
         message.error(response.message);
       }
@@ -104,20 +112,28 @@ function AddEditExam() {
       render: (text, record) => {
         return Object.keys(record.options).map((key) => {
           return (
-            <div>
-              {key} : {record.options[key]}
+            <div key={key} className="flex items-center gap-2">
+              <span className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full">
+                {key}
+              </span>
+              <span>{record.options[key]}</span>
             </div>
           );
         });
       },
     },
     {
-      title: "Correct Option",
-      dataIndex: "correctOption",
+      title: "Correct Options",
+      dataIndex: "correctOptions",
       render: (text, record) => {
-        return ` ${record.correctOption} : ${
-          record.options[record.correctOption]
-        }`;
+        return record.correctOptions?.map((option) => (
+          <div key={option} className="flex items-center gap-2 text-green-600">
+            <span className="w-6 h-6 flex items-center justify-center bg-green-100 rounded-full font-semibold">
+              {option}
+            </span>
+            <span>{record.options[option]}</span>
+          </div>
+        ));
       },
     },
     {
@@ -125,19 +141,27 @@ function AddEditExam() {
       dataIndex: "action",
       render: (text, record) => (
         <div className="flex gap-2">
-          <i
-            className="ri-pencil-line"
-            onClick={() => {
+          <button
+            type="button"
+            className="px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+            onClick={(e) => {
+              e.stopPropagation();
               setSelectedQuestion(record);
               setShowAddEditQuestionModal(true);
             }}
-          ></i>
-          <i
-            className="ri-delete-bin-line"
-            onClick={() => {
+          >
+            <i className="ri-pencil-line"></i>
+          </button>
+          <button
+            type="button"
+            className="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
+            onClick={(e) => {
+              e.stopPropagation();
               deleteQuestion(record._id);
             }}
-          ></i>
+          >
+            <i className="ri-delete-bin-line"></i>
+          </button>
         </div>
       ),
     },
@@ -159,8 +183,19 @@ function AddEditExam() {
                   </Form.Item>
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Exam Duration" name="duration">
-                    <input type="number" />
+                  <Form.Item 
+                    label="Exam Duration (Minutes)" 
+                    name="duration"
+                    rules={[
+                      { required: true, message: 'Please input exam duration!' },
+                      { type: 'number', min: 1, message: 'Duration must be at least 1 minute!' }
+                    ]}
+                  >
+                    <input 
+                      type="number" 
+                      min="1"
+                      className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors"
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={8}>
@@ -206,9 +241,12 @@ function AddEditExam() {
               <TabPane tab="Questions" key="2">
                 <div className="flex justify-end">
                   <button
-                    className="primary-outlined-btn"
                     type="button"
-                    onClick={() => setShowAddEditQuestionModal(true)}
+                    className="primary-outlined-btn"
+                    onClick={() => {
+                      setSelectedQuestion(null);
+                      setShowAddEditQuestionModal(true);
+                    }}
                   >
                     Add Question
                   </button>
@@ -217,6 +255,8 @@ function AddEditExam() {
                 <Table
                   columns={questionsColumns}
                   dataSource={examData?.questions || []}
+                  pagination={false}
+                  className="mt-4"
                 />
               </TabPane>
             )}
@@ -226,10 +266,10 @@ function AddEditExam() {
 
       {showAddEditQuestionModal && (
         <AddEditQuestion
-          setShowAddEditQuestionModal={setShowAddEditQuestionModal}
           showAddEditQuestionModal={showAddEditQuestionModal}
-          examId={params.id}
+          setShowAddEditQuestionModal={setShowAddEditQuestionModal}
           refreshData={getExamData}
+          examId={params.id}
           selectedQuestion={selectedQuestion}
           setSelectedQuestion={setSelectedQuestion}
         />

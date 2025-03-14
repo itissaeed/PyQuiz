@@ -26,7 +26,11 @@ function Home() {
         limit: pageSize
       });
       if (response.success) {
-        setExams(response.data);
+        const examsWithMinutes = response.data.map(exam => ({
+          ...exam,
+          displayDuration: Math.floor(exam.duration / 60)
+        }));
+        setExams(examsWithMinutes);
         setTotal(response.total);
         setTotalPages(response.totalPages);
         setCurrentPage(response.currentPage);
@@ -99,7 +103,7 @@ function Home() {
                       </div>
                       <div className="flex items-center text-gray-600">
                         <i className="ri-time-line mr-2"></i>
-                        <span>Duration: {exam.duration} mins</span>
+                        <span>Duration: {exam.displayDuration} mins</span>
                       </div>
                     </div>
                     <button

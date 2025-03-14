@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 
 function Instructions({ examData, setView, startTimer }) {
   const navigate = useNavigate();
+  const durationInMinutes = Math.floor(examData.duration / 60);
+  
   return (
     <div className="flex flex-col items-center gap-5">
       <ul className="flex flex-col gap-1">
         <h1 className="text-2xl underline">Instructions</h1>
-        <li>Exam must be completed in {examData.duration} secons.</li>
+        <li>Exam must be completed in {durationInMinutes} minutes.</li>
         <li>
-          Exam will be submitted automatically after {examData.duration}{" "}
-          seconds.
+          Exam will be submitted automatically after {durationInMinutes}{" "}
+          minutes.
         </li>
         <li>Once submitted, you cannot change your answers.</li>
         <li>Do not refresh the page.</li>

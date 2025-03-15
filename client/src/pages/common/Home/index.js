@@ -1,7 +1,7 @@
 import { Col, message, Row, Spin, Pagination, Empty } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllExams, updateAllExamsDifficulty } from "../../../apicalls/exams";
+import { getAllExams } from "../../../apicalls/exams";
 import { HideLoading, ShowLoading } from "../../../redux/loaderSlice";
 import PageTitle from "../../../components/PageTitle";
 import { useNavigate } from "react-router-dom";
@@ -21,9 +21,6 @@ function Home() {
   const getExams = async (page = 1) => {
     try {
       setLoading(true);
-      
-      // First update all exams with difficulty
-      await updateAllExamsDifficulty();
       
       // Then fetch the updated exams
       const response = await getAllExams({
@@ -113,16 +110,14 @@ function Home() {
                         <i className="ri-time-line mr-2"></i>
                         <span>Duration: {exam.displayDuration} mins</span>
                       </div>
-                      <div className="mt-2">
-                        <span className="text-sm font-medium text-gray-600">Difficulty Level:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium
-                            ${exam.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : 
-                              exam.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
-                              'bg-red-100 text-red-800'}`}>
-                            {exam.difficulty || 'Medium'} Level
-                          </span>
-                        </div>
+                      <div className="flex items-center text-gray-600">
+                        <i className="ri-bar-chart-line mr-2"></i>
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold
+                          ${exam.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : 
+                            exam.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-red-100 text-red-800'}`}>
+                          Difficulty: {exam.difficulty || 'Medium'}
+                        </span>
                       </div>
                     </div>
                     <button

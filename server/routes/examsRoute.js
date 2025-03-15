@@ -237,11 +237,10 @@ router.post("/delete-question-in-exam", authMiddleware, async (req, res) => {
 // update all exams to include difficulty
 router.post("/update-all-exams-difficulty", authMiddleware, async (req, res) => {
   try {
-    // Force update all exams with default difficulty
+    // Only update exams that don't have a difficulty set
     const result = await Exam.updateMany(
-      {}, // Update all documents
-      { $set: { difficulty: 'Medium' } },
-      { upsert: true }
+      { difficulty: { $exists: false } }, // Only update documents without difficulty
+      { $set: { difficulty: 'Medium' } }
     );
 
     // Verify the update by fetching all exams
@@ -249,7 +248,7 @@ router.post("/update-all-exams-difficulty", authMiddleware, async (req, res) => 
     console.log('Updated exams:', updatedExams);
 
     res.send({
-      message: `Updated ${result.modifiedCount} exams with default difficulty`,
+      message: `Updated ${result.modifiedCount} exams that were missing difficulty`,
       success: true,
       data: result
     });

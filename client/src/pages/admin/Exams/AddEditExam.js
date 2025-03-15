@@ -227,9 +227,9 @@ function AddEditExam() {
                     label="Difficulty Level" 
                     name="difficulty"
                     rules={[{ required: true, message: 'Please select difficulty level!' }]}
-                    initialValue="Medium"
                   >
                     <select className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors">
+                      <option value="">Select Difficulty</option>
                       <option value="Easy">Easy</option>
                       <option value="Medium">Medium</option>
                       <option value="Hard">Hard</option>

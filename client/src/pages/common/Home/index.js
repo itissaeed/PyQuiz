@@ -1,4 +1,4 @@
-import { Col, message, Row, Spin, Pagination, Empty } from "antd";
+import { Col, message, Row, Spin, Pagination, Empty, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllExams } from "../../../apicalls/exams";
@@ -12,6 +12,7 @@ function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
+  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const pageSize = 8;
   
   const navigate = useNavigate();
@@ -57,6 +58,10 @@ function Home() {
     setCurrentPage(page);
   };
 
+  const filteredExams = selectedDifficulty === 'all' 
+    ? exams 
+    : exams.filter(exam => exam.difficulty === selectedDifficulty);
+
   if (!user) return null;
 
   return (
@@ -66,18 +71,46 @@ function Home() {
         <div className="text-gray-600 text-center mt-2">
           Choose from our selection of quizzes and test your knowledge
         </div>
+        <div className="flex justify-end mt-4">
+          <div style={{ width: '200px' }}>
+            <Select
+              className="w-full"
+              placeholder="Filter by Difficulty"
+              value={selectedDifficulty}
+              onChange={(value) => setSelectedDifficulty(value)}
+              options={[
+                { value: 'all', label: 'All Difficulties', className: 'hover:bg-[#0f9898]/10' },
+                { value: 'Easy', label: 'Easy', className: 'bg-green-50 hover:bg-green-100 text-green-600' },
+                { value: 'Medium', label: 'Medium', className: 'bg-yellow-50 hover:bg-yellow-100 text-yellow-600' },
+                { value: 'Hard', label: 'Hard', className: 'bg-red-50 hover:bg-red-100 text-red-600' }
+              ]}
+              dropdownStyle={{ 
+                backgroundColor: '#f5fafa',
+                borderRadius: '8px',
+                padding: '4px'
+              }}
+              style={{ 
+                width: '200px',
+                backgroundColor: '#f5fafa',
+                borderRadius: '8px',
+                border: '2px solid #0f9898',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+              }}
+            />
+          </div>
+        </div>
       </div>
       
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Spin size="large" />
         </div>
-      ) : exams.length === 0 ? (
+      ) : filteredExams.length === 0 ? (
         <div className="flex justify-center items-center h-64">
           <Empty
             description={
               <span className="text-lg text-gray-500">
-                No exams available at the moment
+                No exams available for selected difficulty
               </span>
             }
           />
@@ -85,7 +118,7 @@ function Home() {
       ) : (
         <>
           <Row gutter={[16, 16]}>
-            {exams.map((exam) => (
+            {filteredExams.map((exam) => (
               <Col key={exam._id} xs={24} sm={12} md={8} lg={6}>
                 <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 h-full">
                   <div className="p-6">

@@ -12,9 +12,9 @@ export const addExam = async (payload) => {
 };
 
 // get all exams
-export const getAllExams = async () => {
+export const getAllExams = async (payload) => {
   try {
-    const response = await axiosInstance.post("/api/exams/get-all-exams");
+    const response = await axiosInstance.post("/api/exams/get-all-exams", payload);
     return response.data;
   } catch (error) {
     return error.response.data;
@@ -100,3 +100,13 @@ export const deleteQuestionById = async (payload) => {
     return error.response.data;
   }
 }
+
+// update all exams difficulty
+export const updateAllExamsDifficulty = async () => {
+  try {
+    const response = await axiosInstance.post("/api/exams/update-all-exams-difficulty");
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+};

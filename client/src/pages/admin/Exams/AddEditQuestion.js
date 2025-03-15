@@ -23,6 +23,7 @@ function AddEditQuestion({
         B: selectedQuestion.options.B,
         C: selectedQuestion.options.C,
         D: selectedQuestion.options.D,
+        difficulty: selectedQuestion.difficulty || 'Medium',
         correctOptions: selectedQuestion.correctOptions || [selectedQuestion.correctOption],
       });
     }
@@ -41,6 +42,7 @@ function AddEditQuestion({
           C: values.C,
           D: values.D,
         },
+        difficulty: values.difficulty,
         exam: examId,
       };
 
@@ -95,6 +97,19 @@ function AddEditQuestion({
           rules={[{ required: true, message: 'Please input the question!' }]}
         >
           <input type="text" className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors" />
+        </Form.Item>
+
+        <Form.Item
+          name="difficulty"
+          label={<span className="text-lg font-semibold text-gray-700">Difficulty Level</span>}
+          rules={[{ required: true, message: 'Please select difficulty level!' }]}
+          initialValue="Medium"
+        >
+          <select className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors">
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
         </Form.Item>
 
         <div className="grid grid-cols-2 gap-4">

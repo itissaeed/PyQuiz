@@ -20,6 +20,12 @@ const questionSchema = new mongoose.Schema({
     type: Object,
     required: true,
   },
+  difficulty: {
+    type: String,
+    enum: ['Easy', 'Medium', 'Hard'],
+    default: 'Medium',
+    required: true
+  },
   exam: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "exams",

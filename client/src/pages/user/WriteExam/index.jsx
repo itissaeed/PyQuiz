@@ -1,4 +1,4 @@
-import { message, Checkbox } from "antd";
+import { message, Checkbox, Radio } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -133,11 +133,19 @@ function WriteExam() {
 
         {view === "questions" && (
           <div className="flex flex-col gap-2">
-            <div className="flex justify-between">
-              <h1 className="text-2xl">
-                {selectedQuestionIndex + 1} :{" "}
-                {questions[selectedQuestionIndex].name}
-              </h1>
+            <div className="flex justify-between mb-4">
+              <div className="flex flex-col gap-2">
+                <h1 className="text-2xl">
+                  {selectedQuestionIndex + 1} :{" "}
+                  {questions[selectedQuestionIndex].name}
+                </h1>
+                {questions[selectedQuestionIndex].correctOptions?.length > 1 && (
+                  <div className="text-sm text-blue-600 font-medium flex items-center gap-2">
+                    <i className="ri-information-line"></i>
+                    <span>This question has multiple correct answers!</span>
+                  </div>
+                )}
+              </div>
 
               <div className="timer">
                 <span className="text-2xl">
@@ -147,39 +155,86 @@ function WriteExam() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Checkbox.Group
-                className="flex flex-col gap-2"
-                value={selectedOptions[selectedQuestionIndex] || []}
-                onChange={(values) => {
-                  setSelectedOptions({
-                    ...selectedOptions,
-                    [selectedQuestionIndex]: values,
-                  });
-                }}
-              >
-                {Object.keys(questions[selectedQuestionIndex].options).map(
-                  (option, index) => {
-                    return (
-                      <Checkbox
-                        key={index}
-                        value={option}
-                        className={`option p-2 ${
-                          (selectedOptions[selectedQuestionIndex] || []).includes(option)
-                            ? "selected-option"
-                            : ""
-                        }`}
-                      >
-                        <span className="text-xl">
-                          {option} : {questions[selectedQuestionIndex].options[option]}
-                        </span>
-                      </Checkbox>
-                    );
-                  }
-                )}
-              </Checkbox.Group>
+              {questions[selectedQuestionIndex].correctOptions?.length > 1 ? (
+                <div className="flex flex-col gap-2">
+                  {Object.keys(questions[selectedQuestionIndex].options).map(
+                    (option, index) => {
+                      const isSelected = selectedOptions[selectedQuestionIndex]?.includes(option);
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            const currentSelected = selectedOptions[selectedQuestionIndex] || [];
+                            let newSelected;
+                            if (currentSelected.includes(option)) {
+                              newSelected = currentSelected.filter(opt => opt !== option);
+                            } else {
+                              newSelected = [...currentSelected, option];
+                            }
+                            setSelectedOptions({
+                              ...selectedOptions,
+                              [selectedQuestionIndex]: newSelected,
+                            });
+                          }}
+                          className={`option ant-radio-wrapper cursor-pointer ${
+                            isSelected ? "selected-option" : ""
+                          }`}
+                        >
+                          <div className="ant-radio">
+                            <div className={`ant-radio-inner ${isSelected ? "ant-radio-checked" : ""}`} 
+                                 style={{
+                                   width: "20px",
+                                   height: "20px",
+                                   border: `2px solid ${isSelected ? "#0f9898" : "#d9d9d9"}`,
+                                   backgroundColor: isSelected ? "#0f9898" : "#fff",
+                                   borderRadius: "50%",
+                                   position: "relative"
+                                 }}
+                            />
+                          </div>
+                          <span className="text-xl">
+                            {option} : {questions[selectedQuestionIndex].options[option]}
+                          </span>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              ) : (
+                <Radio.Group
+                  className="flex flex-col gap-2"
+                  value={selectedOptions[selectedQuestionIndex]?.[0] || ''}
+                  onChange={(e) => {
+                    setSelectedOptions({
+                      ...selectedOptions,
+                      [selectedQuestionIndex]: [e.target.value],
+                    });
+                  }}
+                >
+                  {Object.keys(questions[selectedQuestionIndex].options).map(
+                    (option, index) => {
+                      return (
+                        <Radio
+                          key={index}
+                          value={option}
+                          className={`option ${
+                            selectedOptions[selectedQuestionIndex]?.[0] === option
+                              ? "selected-option"
+                              : ""
+                          }`}
+                        >
+                          <span className="text-xl">
+                            {option} : {questions[selectedQuestionIndex].options[option]}
+                          </span>
+                        </Radio>
+                      );
+                    }
+                  )}
+                </Radio.Group>
+              )}
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between mt-4">
               {selectedQuestionIndex > 0 && (
                 <button
                   className="primary-outlined-btn"

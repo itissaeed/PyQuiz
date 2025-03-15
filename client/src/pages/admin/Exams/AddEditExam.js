@@ -25,10 +25,11 @@ function AddEditExam() {
   const params = useParams();
   const onFinish = async (values) => {
     try {
+      console.log('Form values:', values); // Debug log
       dispatch(ShowLoading());
-      // Convert minutes to seconds before saving
       const durationInSeconds = values.duration * 60;
       const payload = { ...values, duration: durationInSeconds };
+      console.log('Payload to be sent:', payload); // Debug log
       
       let response;
       if (params.id) {
@@ -39,6 +40,8 @@ function AddEditExam() {
       } else {
         response = await addExam(payload);
       }
+      console.log('Response:', response); // Debug log
+
       if (response.success) {
         message.success(response.message);
         navigate("/admin/exams");
@@ -178,7 +181,11 @@ function AddEditExam() {
             <TabPane tab="Exam Details" key="1">
               <Row gutter={[10, 10]}>
                 <Col span={8}>
-                  <Form.Item label="Exam Name" name="name">
+                  <Form.Item 
+                    label="Exam Name" 
+                    name="name"
+                    rules={[{ required: true, message: 'Please input exam name!' }]}
+                  >
                     <input type="text" />
                   </Form.Item>
                 </Col>
@@ -187,20 +194,23 @@ function AddEditExam() {
                     label="Exam Duration (Minutes)" 
                     name="duration"
                     rules={[
-                      { required: true, message: 'Please input exam duration!' },
-                      { type: 'number', min: 1, message: 'Duration must be at least 1 minute!' }
+                      { required: true, message: 'Please input exam duration!' }
                     ]}
                   >
                     <input 
-                      type="number" 
+                      type="number"
                       min="1"
                       className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors"
                     />
                   </Form.Item>
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Category" name="category">
-                    <select name="" id="">
+                  <Form.Item 
+                    label="Category" 
+                    name="category"
+                    rules={[{ required: true, message: 'Please select a category!' }]}
+                  >
+                    <select className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors">
                       <option value="">Select Category</option>
                       <option value="Javascript">Javascript</option>
                       <option value="React">React</option>
@@ -209,18 +219,51 @@ function AddEditExam() {
                       <option value="GK">GK</option>
                       <option value="ML">Machine Learning</option>
                       <option value="ebusiness">E-business</option>
-
                     </select>
                   </Form.Item>
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Total Marks" name="totalMarks">
-                    <input type="number" />
+                  <Form.Item 
+                    label="Difficulty Level" 
+                    name="difficulty"
+                    rules={[{ required: true, message: 'Please select difficulty level!' }]}
+                    initialValue="Medium"
+                  >
+                    <select className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors">
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
                   </Form.Item>
                 </Col>
                 <Col span={8}>
-                  <Form.Item label="Passing Marks" name="passingMarks">
-                    <input type="number" />
+                  <Form.Item 
+                    label="Total Marks" 
+                    name="totalMarks"
+                    rules={[
+                      { required: true, message: 'Please input total marks!' }
+                    ]}
+                  >
+                    <input 
+                      type="number" 
+                      min="1"
+                      className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors" 
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item 
+                    label="Passing Marks" 
+                    name="passingMarks"
+                    rules={[
+                      { required: true, message: 'Please input passing marks!' }
+                    ]}
+                  >
+                    <input 
+                      type="number" 
+                      min="1"
+                      className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors" 
+                    />
                   </Form.Item>
                 </Col>
               </Row>

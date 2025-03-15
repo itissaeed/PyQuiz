@@ -9,6 +9,7 @@ const examSchema = new mongoose.Schema(
     duration: {
       type: Number,
       required: true,
+      min: [60, 'Duration must be at least 60 seconds (1 minute)'],
     },
     category: {
       type: String,
@@ -21,6 +22,12 @@ const examSchema = new mongoose.Schema(
     passingMarks: {
       type: Number,
       required: true,
+    },
+    difficulty: {
+      type: String,
+      enum: ['Easy', 'Medium', 'Hard'],
+      default: 'Medium',
+      required: true
     },
     questions: {
       type: [mongoose.Schema.Types.ObjectId],

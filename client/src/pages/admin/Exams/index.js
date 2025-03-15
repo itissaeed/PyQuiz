@@ -60,6 +60,18 @@ function Exams() {
       dataIndex: "category",
     },
     {
+      title: "Difficulty",
+      dataIndex: "difficulty",
+      render: (text) => (
+        <span className={`px-2 py-1 rounded-full text-sm font-medium
+          ${text === 'Easy' ? 'bg-green-100 text-green-800' : 
+            text === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
+            'bg-red-100 text-red-800'}`}>
+          {text || 'Medium'}
+        </span>
+      ),
+    },
+    {
       title: "Total Marks",
       dataIndex: "totalMarks",
     },

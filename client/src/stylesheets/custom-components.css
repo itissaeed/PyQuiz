@@ -151,3 +151,66 @@
     transform: scale(1);
   }
 }
+
+/* Remove existing radio button styles and add new ones */
+.option.ant-radio-wrapper {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 4px 0;
+  transition: all 0.3s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.option .ant-radio {
+  flex: 0 0 auto;
+  margin-right: 12px;
+}
+
+.option .ant-radio-inner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #0f9898;
+  background-color: #fff;
+}
+
+.option .ant-radio-inner::after {
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  background-color: #0f9898;
+  transform: scale(0);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.option .ant-radio-checked .ant-radio-inner {
+  border-color: #0f9898;
+  background-color: #0f9898;
+}
+
+.option .ant-radio-checked .ant-radio-inner::after {
+  transform: scale(0.8);
+  opacity: 1;
+  background-color: #0f9898;
+}
+
+.option span.text-xl {
+  flex: 1;
+  margin-left: 8px;
+  color: #4a5568;
+}
+
+.option:hover {
+  border-color: #0f9898;
+  background-color: #e6f7f7;
+}
+
+.option.selected-option {
+  background-color: #e6f7f7;
+  border-color: #0f9898;
+}

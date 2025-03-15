@@ -38,7 +38,7 @@ router.post("/get-all-exams", authMiddleware, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const exams = await Exam.find({})
-      .select('name category totalMarks passingMarks duration') // Select only needed fields
+      .select('name category totalMarks passingMarks duration difficulty') // Added difficulty field
       .skip(skip)
       .limit(limit)
       .lean(); // Convert to plain JS object for better performance
@@ -97,10 +97,26 @@ router.post("/get-exam-by-id", authMiddleware, async (req, res) => {
 // edit exam by id
 router.post("/edit-exam-by-id", authMiddleware, async (req, res) => {
   try {
-    await Exam.findByIdAndUpdate(req.body.examId, req.body);
+    const { examId, ...updateData } = req.body;
+
+    // Update the exam
+    const updatedExam = await Exam.findByIdAndUpdate(
+      examId,
+      updateData,
+      { new: true }
+    ).populate("questions");
+
+    if (!updatedExam) {
+      return res.status(404).send({
+        message: "Exam not found",
+        success: false,
+      });
+    }
+
     res.send({
       message: "Exam edited successfully",
       success: true,
+      data: updatedExam,
     });
   } catch (error) {
     res.status(500).send({
@@ -218,5 +234,33 @@ router.post("/delete-question-in-exam", authMiddleware, async (req, res) => {
      }
 });
 
+// update all exams to include difficulty
+router.post("/update-all-exams-difficulty", authMiddleware, async (req, res) => {
+  try {
+    // Force update all exams with default difficulty
+    const result = await Exam.updateMany(
+      {}, // Update all documents
+      { $set: { difficulty: 'Medium' } },
+      { upsert: true }
+    );
+
+    // Verify the update by fetching all exams
+    const updatedExams = await Exam.find({}).select('name difficulty');
+    console.log('Updated exams:', updatedExams);
+
+    res.send({
+      message: `Updated ${result.modifiedCount} exams with default difficulty`,
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('Error updating exams:', error);
+    res.status(500).send({
+      message: error.message,
+      data: error,
+      success: false,
+    });
+  }
+});
 
 module.exports = router;

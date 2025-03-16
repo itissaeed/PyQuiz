@@ -13,6 +13,7 @@ function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
   const pageSize = 8;
   
   const navigate = useNavigate();
@@ -58,20 +59,32 @@ function Home() {
     setCurrentPage(page);
   };
 
-  const filteredExams = selectedDifficulty === 'all' 
-    ? exams 
-    : exams.filter(exam => exam.difficulty === selectedDifficulty);
+  const filteredExams = exams.filter((exam) => {
+    const matchesDifficulty = selectedDifficulty === "all" || exam.difficulty === selectedDifficulty;
+    const matchesSearch = exam.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesDifficulty && matchesSearch;
+  });
 
   if (!user) return null;
 
   return (
     <div className="container mx-auto px-4">
-      <div className="mb-8">
+      <div>
         <PageTitle title={`Available Exams`} />
         <div className="text-gray-600 text-center mt-2">
           Choose from our selection of quizzes and test your knowledge
         </div>
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-between items-center mt-4 gap-4">
+          <div className="flex-1 w-px" >
+            <input
+              type="text"
+              placeholder="Search exams..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-64 px-4 py-2 rounded-lg border-2 border-gray-300 focus:border-[#0f9898] focus:outline-none hover:border-gray-400 transition-all duration-300 text-gray-700 placeholder-gray-500 shadow-sm"
+            />
+          </div>
+          <div className="h-10 w-px bg-gray-200"></div>
           <div style={{ width: '200px' }}>
             <Select
               className="w-full"
@@ -100,85 +113,87 @@ function Home() {
           </div>
         </div>
       </div>
-      
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <Spin size="large" />
-        </div>
-      ) : filteredExams.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <Empty
-            description={
-              <span className="text-lg text-gray-500">
-                No exams available for selected difficulty
-              </span>
-            }
-          />
-        </div>
-      ) : (
-        <>
-          <Row gutter={[16, 16]}>
-            {filteredExams.map((exam) => (
-              <Col key={exam._id} xs={24} sm={12} md={8} lg={6}>
-                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 h-full">
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <i className="ri-file-list-3-line text-2xl text-primary mr-2"></i>
-                      <h2 className="text-xl font-semibold text-gray-800">{exam?.name}</h2>
+
+      <div className="mt-20">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Spin size="large" />
+          </div>
+        ) : filteredExams.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <Empty
+              description={
+                <span className="text-lg text-gray-500">
+                  No exams available for selected difficulty
+                </span>
+              }
+            />
+          </div>
+        ) : (
+          <>
+            <Row gutter={[16, 16]}>
+              {filteredExams.map((exam) => (
+                <Col key={exam._id} xs={24} sm={12} md={8} lg={6}>
+                  <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 h-full">
+                    <div className="p-6">
+                      <div className="flex items-center mb-4">
+                        <i className="ri-file-list-3-line text-2xl text-primary mr-2"></i>
+                        <h2 className="text-xl font-semibold text-gray-800">{exam?.name}</h2>
+                      </div>
+                      <div className="space-y-2 mb-6">
+                        <div className="flex items-center text-gray-600">
+                          <i className="ri-folder-line mr-2"></i>
+                          <span>{exam.category}</span>
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="ri-award-line mr-2"></i>
+                          <span>Total Marks: {exam.totalMarks}</span>
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="ri-check-line mr-2"></i>
+                          <span>Passing: {exam.passingMarks}</span>
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="ri-time-line mr-2"></i>
+                          <span>Duration: {exam.displayDuration} mins</span>
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="ri-bar-chart-line mr-2"></i>
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold
+                            ${exam.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : 
+                              exam.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
+                              'bg-red-100 text-red-800'}`}>
+                            Difficulty: {exam.difficulty || 'Medium'}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        className="w-full bg-primary text-white py-2 rounded-lg hover:opacity-90 transition-all flex items-center justify-center"
+                        onClick={() => navigate(`/user/write-exam/${exam._id}`)}
+                      >
+                        <i className="ri-play-circle-line mr-2"></i>
+                        Start Exam
+                      </button>
                     </div>
-                    <div className="space-y-2 mb-6">
-                      <div className="flex items-center text-gray-600">
-                        <i className="ri-folder-line mr-2"></i>
-                        <span>{exam.category}</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="ri-award-line mr-2"></i>
-                        <span>Total Marks: {exam.totalMarks}</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="ri-check-line mr-2"></i>
-                        <span>Passing: {exam.passingMarks}</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="ri-time-line mr-2"></i>
-                        <span>Duration: {exam.displayDuration} mins</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="ri-bar-chart-line mr-2"></i>
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold
-                          ${exam.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : 
-                            exam.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-red-100 text-red-800'}`}>
-                          Difficulty: {exam.difficulty || 'Medium'}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      className="w-full bg-primary text-white py-2 rounded-lg hover:opacity-90 transition-all flex items-center justify-center"
-                      onClick={() => navigate(`/user/write-exam/${exam._id}`)}
-                    >
-                      <i className="ri-play-circle-line mr-2"></i>
-                      Start Exam
-                    </button>
                   </div>
-                </div>
-              </Col>
-            ))}
-          </Row>
-          {total > pageSize && (
-            <div className="flex justify-center mt-8 mb-4">
-              <Pagination
-                current={currentPage}
-                total={total}
-                pageSize={pageSize}
-                onChange={handlePageChange}
-                showSizeChanger={false}
-                className="custom-pagination"
-              />
-            </div>
-          )}
-        </>
-      )}
+                </Col>
+              ))}
+            </Row>
+            {total > pageSize && (
+              <div className="flex justify-center mt-8 mb-4">
+                <Pagination
+                  current={currentPage}
+                  total={total}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                  className="custom-pagination"
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

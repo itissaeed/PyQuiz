@@ -21,14 +21,93 @@ function WriteExam() {
   const [timeUp, setTimeUp] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
   const { user } = useSelector((state) => state.users);
+
+  // Update localStorage when exam view changes
+  useEffect(() => {
+    localStorage.setItem("examView", view);
+    localStorage.setItem("timeUp", timeUp.toString());
+    
+    // Clean up localStorage when component unmounts
+    return () => {
+      if (view === "result" || view === "review") {
+        localStorage.removeItem("examView");
+        localStorage.removeItem("timeUp");
+      }
+    };
+  }, [view, timeUp]);
+
+  // Clean up on component unmount
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem("examView");
+      localStorage.removeItem("timeUp");
+    };
+  }, []);
+
+  // Add event listener for page navigation
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (view === "questions" && !timeUp) {
+        e.preventDefault();
+        e.returnValue = "Are you sure you want to leave? Your exam progress will be lost!";
+        return e.returnValue;
+      }
+    };
+
+    const handlePopState = (e) => {
+      if (view === "questions" && !timeUp) {
+        e.preventDefault();
+        window.history.pushState(null, null, window.location.pathname);
+        message.error("Please complete or submit the exam before leaving!");
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+    
+    // Push initial state
+    window.history.pushState(null, null, window.location.pathname);
+
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [view, timeUp]);
+
+  // Prevent navigation using keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (view === "questions" && !timeUp) {
+        // Prevent Alt+Left/Right (browser back/forward)
+        if (e.altKey && (e.keyCode === 37 || e.keyCode === 39)) {
+          e.preventDefault();
+          message.error("Please complete or submit the exam before leaving!");
+        }
+        // Prevent Ctrl+R (refresh)
+        if (e.ctrlKey && e.keyCode === 82) {
+          e.preventDefault();
+          message.error("Please complete or submit the exam before refreshing!");
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [view, timeUp]);
+
   const getExamData = async () => {
     try {
       dispatch(ShowLoading());
+      console.log("Fetching exam with ID:", params.id);
       const response = await getExamById({
         examId: params.id,
       });
+      console.log("Exam API Response:", response);
       dispatch(HideLoading());
       if (response.success) {
+        console.log("Setting exam data:", response.data);
         setQuestions(response.data.questions);
         setExamData(response.data);
         setSecondsLeft(response.data.duration);
@@ -38,6 +117,7 @@ function WriteExam() {
     } catch (error) {
       dispatch(HideLoading());
       message.error(error.message);
+      console.error("Error fetching exam:", error);
     }
   };
 
@@ -81,6 +161,9 @@ function WriteExam() {
       });
       dispatch(HideLoading());
       if (response.success) {
+        // Clear exam state when moving to result view
+        localStorage.removeItem("examView");
+        localStorage.removeItem("timeUp");
         setView("result");
       } else {
         message.error(response.message);
@@ -116,6 +199,11 @@ function WriteExam() {
       getExamData();
     }
   }, []);
+
+  if (!examData) {
+    return <div className="flex justify-center items-center h-screen">Loading exam...</div>;
+  }
+
   return (
     examData && (
       <div className="mt-2">
@@ -263,6 +351,9 @@ function WriteExam() {
                   onClick={() => {
                     clearInterval(intervalId);
                     setTimeUp(true);
+                    // Clear exam state when submitting
+                    localStorage.removeItem("examView");
+                    localStorage.removeItem("timeUp");
                   }}
                 >
                   Submit
@@ -378,6 +469,9 @@ function WriteExam() {
                 className="primary-outlined-btn"
                 onClick={() => {
                   navigate("/");
+                  // Clear exam state when closing review
+                  localStorage.removeItem("examView");
+                  localStorage.removeItem("timeUp");
                 }}
               >
                 Close

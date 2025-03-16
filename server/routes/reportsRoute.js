@@ -27,11 +27,12 @@ router.post("/add-report", authMiddleware, async (req, res) => {
 
 router.post("/get-all-reports", authMiddleware, async (req, res) => {
   try {
-    const { examName, userName } = req.body;
+    const { examName = "", userName = "" } = req.body;
 
     const exams = await Exam.find({
       name: {
-        $regex: examName,
+        $regex: examName || "",
+        $options: "i"  // case-insensitive
       },
     });
 
@@ -39,19 +40,16 @@ router.post("/get-all-reports", authMiddleware, async (req, res) => {
 
     const users = await User.find({
       name: {
-        $regex: userName,
+        $regex: userName || "",
+        $options: "i"  // case-insensitive
       },
     });
 
     const matchedUserIds = users.map((user) => user._id);
 
     const reports = await Report.find({
-      exam: {
-        $in: matchedExamIds,
-      },
-      user: {
-        $in: matchedUserIds,
-      },
+      exam: matchedExamIds.length ? { $in: matchedExamIds } : { $exists: true },
+      user: matchedUserIds.length ? { $in: matchedUserIds } : { $exists: true },
     })
       .populate("exam")
       .populate("user")

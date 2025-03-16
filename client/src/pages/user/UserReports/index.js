@@ -1,6 +1,6 @@
 import React from "react";
 import PageTitle from "../../../components/PageTitle";
-import { message, Modal, Table } from "antd";
+import { message, Modal, Table, Input } from "antd";
 import { useDispatch } from "react-redux";
 import { HideLoading, ShowLoading } from "../../../redux/loaderSlice";
 import { getAllReportsByUser } from "../../../apicalls/reports";
@@ -9,6 +9,8 @@ import moment from "moment";
 
 function UserReports() {
   const [reportsData, setReportsData] = React.useState([]);
+  const [searchText, setSearchText] = React.useState("");
+  const [filteredData, setFilteredData] = React.useState([]);
   const dispatch = useDispatch();
   const columns = [
     {
@@ -51,6 +53,7 @@ function UserReports() {
       const response = await getAllReportsByUser();
       if (response.success) {
         setReportsData(response.data);
+        setFilteredData(response.data);
       } else {
         message.error(response.message);
       }
@@ -65,11 +68,28 @@ function UserReports() {
     getData();
   }, []);
 
+  // Filter data when search text changes
+  useEffect(() => {
+    const filtered = reportsData.filter(report => 
+      report.exam.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchText, reportsData]);
+
   return (
     <div>
       <PageTitle title="Reports" />
       <div className="divider"></div>
-      <Table columns={columns} dataSource={reportsData} />
+      <div className="flex gap-2 mb-2">
+        <Input
+          type="text"
+          placeholder="Search by exam name..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          style={{ width: '200px' }}
+        />
+      </div>
+      <Table columns={columns} dataSource={filteredData} />
     </div>
   );
 }

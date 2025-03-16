@@ -1,6 +1,6 @@
 import React from "react";
 import PageTitle from "../../../components/PageTitle";
-import { message, Table } from "antd";
+import { message, Table, Input } from "antd";
 import { useDispatch } from "react-redux";
 import { HideLoading, ShowLoading } from "../../../redux/loaderSlice";
 import { getAllReports } from "../../../apicalls/reports";
@@ -9,6 +9,7 @@ import moment from "moment";
 
 function AdminReports() {
   const [reportsData, setReportsData] = React.useState([]);
+  const [filteredData, setFilteredData] = React.useState([]);
   const dispatch = useDispatch();
   const [filters, setFilters] = React.useState({
     examName: "",
@@ -54,12 +55,16 @@ function AdminReports() {
     },
   ];
 
-  const getData = async (tempFilters) => {
+  const getData = async () => {
     try {
       dispatch(ShowLoading());
-      const response = await getAllReports(tempFilters);
+      const response = await getAllReports({
+        examName: "",
+        userName: ""
+      });
       if (response.success) {
         setReportsData(response.data);
+        setFilteredData(response.data);
       } else {
         message.error(response.message);
       }
@@ -71,25 +76,37 @@ function AdminReports() {
   };
 
   useEffect(() => {
-    getData(filters);
+    getData();
   }, []);
+
+  // Filter data when filters change
+  useEffect(() => {
+    const filtered = reportsData.filter(report => {
+      const examMatch = report.exam.name.toLowerCase().includes(filters.examName.toLowerCase());
+      const userMatch = report.user.name.toLowerCase().includes(filters.userName.toLowerCase());
+      return examMatch && userMatch;
+    });
+    setFilteredData(filtered);
+  }, [filters, reportsData]);
 
   return (
     <div>
       <PageTitle title="Reports" />
       <div className="divider"></div>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
-          placeholder="Exam"
+          placeholder="Search by exam name..."
           value={filters.examName}
           onChange={(e) => setFilters({ ...filters, examName: e.target.value })}
+          style={{ width: '200px' }}
         />
-        <input
+        <Input
           type="text"
-          placeholder="User"
+          placeholder="Search by user name..."
           value={filters.userName}
           onChange={(e) => setFilters({ ...filters, userName: e.target.value })}
+          style={{ width: '200px' }}
         />
         <button
           className="primary-outlined-btn"
@@ -98,19 +115,12 @@ function AdminReports() {
               examName: "",
               userName: "",
             });
-            getData({
-              examName: "",
-              userName: "",
-            });
           }}
         >
-          Clear 
-        </button>
-        <button className="primary-contained-btn" onClick={() => getData(filters)}>
-          Search
+          Clear
         </button>
       </div>
-      <Table columns={columns} dataSource={reportsData} className="mt-2" />
+      <Table columns={columns} dataSource={filteredData} className="mt-2" />
     </div>
   );
 }

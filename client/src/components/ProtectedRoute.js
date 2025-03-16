@@ -3,8 +3,10 @@ import React, { useEffect, useState } from "react";
 import { getUserInfo } from "../apicalls/users";
 import { useDispatch, useSelector } from "react-redux";
 import { SetUser } from "../redux/usersSlice.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { HideLoading, ShowLoading } from "../redux/loaderSlice";
+import { Link } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
   const { user } = useSelector((state) => state.users);
@@ -12,6 +14,7 @@ function ProtectedRoute({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const userMenu = [
     {
@@ -138,6 +141,28 @@ function ProtectedRoute({ children }) {
     return false;
   };
 
+  const isExamInProgress = () => {
+    const examPath = location.pathname.includes("/user/write-exam/");
+    const examView = localStorage.getItem("examView");
+    const timeUp = localStorage.getItem("timeUp") === "true";
+    
+    // Allow navigation if:
+    // 1. Not in exam path
+    // 2. Exam view is not 'questions' (i.e., instructions, result, or review)
+    // 3. Time is up
+    // 4. No exam view stored (exam not started)
+    return examPath && examView === "questions" && !timeUp;
+  };
+
+  const handleMenuClick = (menuItem) => (e) => {
+    if (isExamInProgress()) {
+      e.preventDefault();
+      message.error("Please complete or submit the exam before navigating away!");
+      return;
+    }
+    menuItem.onClick();
+  };
+
   if (!user) {
     return null;
   }
@@ -154,7 +179,7 @@ function ProtectedRoute({ children }) {
                     getIsActiveOrNot(item.paths) && "active-menu-item"
                   }`}
                   key={index}
-                  onClick={item.onClick}
+                  onClick={handleMenuClick(item)}
                 >
                   {item.icon}
                   {!collapsed && <span>{item.title}</span>}

@@ -1,4 +1,4 @@
-import { Col, Form, message, Row, Select, Table } from "antd";
+import { Col, Form, message, Row, Select, Table, Input } from "antd";
 import React, { useEffect } from "react";
 import {
   addExam,
@@ -18,11 +18,30 @@ const { TabPane } = Tabs;
 function AddEditExam() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [examData, setExamData] = React.useState(null);
   const [showAddEditQuestionModal, setShowAddEditQuestionModal] =
     React.useState(false);
   const [selectedQuestion, setSelectedQuestion] = React.useState(null);
   const params = useParams();
+  const [categories] = React.useState([
+    "Javascript",
+    "React",
+    "Node",
+    "MongoDB",
+    "Machine Learning Basics",
+    "Cryptography",
+    "Web Security",
+    "Operating Systems",
+    "Database Management Systems",
+    "C & C++ Fundamentals",
+    "Python Basics & Advanced",
+    "Mobile App Development",
+    "Data Structures",
+    "GK",
+    "E-business"
+  ]);
+
   const onFinish = async (values) => {
     try {
       console.log('Form values:', values); // Debug log
@@ -176,7 +195,12 @@ function AddEditExam() {
       <div className="divider"></div>
 
       {(examData || !params.id) && (
-        <Form layout="vertical" onFinish={onFinish} initialValues={examData}>
+        <Form 
+          form={form}
+          layout="vertical" 
+          onFinish={onFinish} 
+          initialValues={examData}
+        >
           <Tabs defaultActiveKey="1">
             <TabPane tab="Exam Details" key="1">
               <Row gutter={[10, 10]}>
@@ -212,13 +236,9 @@ function AddEditExam() {
                   >
                     <select className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 transition-colors">
                       <option value="">Select Category</option>
-                      <option value="Javascript">Javascript</option>
-                      <option value="React">React</option>
-                      <option value="Node">Node</option>
-                      <option value="MongoDB">MongoDB</option>
-                      <option value="GK">GK</option>
-                      <option value="ML">Machine Learning</option>
-                      <option value="ebusiness">E-business</option>
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </Form.Item>
                 </Col>

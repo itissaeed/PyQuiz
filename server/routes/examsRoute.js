@@ -66,8 +66,6 @@ router.post("/get-all-exams", authMiddleware, async (req, res) => {
 // get exam by id
 router.post("/get-exam-by-id", authMiddleware, async (req, res) => {
   try {
-    console.log("Fetching exam with ID:", req.body.examId); // Debug log
-    
     if (!req.body.examId) {
       return res.status(400).send({
         message: "Exam ID is required",
@@ -82,8 +80,6 @@ router.post("/get-exam-by-id", authMiddleware, async (req, res) => {
         select: "name options correctOptions correctOption"
       });
 
-    console.log("Found exam:", exam); // Debug log
-
     if (!exam) {
       return res.status(404).send({
         message: "Exam not found",
@@ -91,12 +87,9 @@ router.post("/get-exam-by-id", authMiddleware, async (req, res) => {
       });
     }
 
-    // Check if exam has questions
-    if (!exam.questions || exam.questions.length === 0) {
-      return res.status(400).send({
-        message: "This exam has no questions yet",
-        success: false
-      });
+    // Initialize questions array if it doesn't exist
+    if (!exam.questions) {
+      exam.questions = [];
     }
 
     res.send({
@@ -105,7 +98,7 @@ router.post("/get-exam-by-id", authMiddleware, async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.error("Error fetching exam:", error); // Debug log
+    console.error("Error fetching exam:", error);
     res.status(500).send({
       message: error.message,
       data: error,

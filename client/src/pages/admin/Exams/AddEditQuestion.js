@@ -161,7 +161,6 @@ function AddEditQuestion({
                     <span className={`w-8 h-8 flex items-center justify-center ${color} rounded-full font-semibold`}>
                       {option}
                     </span>
-                    <span className={`ml-3 ${color.split(' ')[1]}`}>Option {option}</span>
                   </div>
                 </Checkbox>
               </div>
